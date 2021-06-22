@@ -1,45 +1,57 @@
-data "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-}
-
-data "azurerm_client_config" "current" {}
-
-resource "azurerm_key_vault" "keyvault" {
-  name                        = var.keyvault_name
-  location                    = var.location
-  resource_group_name         = data.azurerm_resource_group.rg.name
-  enabled_for_disk_encryption = false
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  soft_delete_enabled         = true
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = false
-
-  sku_name                   = "standard"
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "get",
-    ]
-
-    secret_permissions = [
-      "get",
-      "list",
-      "set",
-      "delete",
-    ]
-
-    storage_permissions = [
-      "get"
-    ]
-
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "=2.46.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.1.0"
+    }
   }
 }
 
-resource "azurerm_key_vault_secret" "db-pwd" {
-  name         = var.secret_name
-  value        = var.secret_value
-  key_vault_id = azurerm_key_vault.keyvault.id
+module "test007example" {
+    source = "./modules/secret"
+}
+
+provider "azurerm" {
+  features {}
+}
+
+data "azurerm_resource_group" "this" {
+  name = "Akademia1"
+}
+
+resource "azurerm_storage_account" "this" {
+  name                     = "valentinbartastorage01"
+  resource_group_name      = data.azurerm_resource_group.this.name
+  location                 = data.azurerm_resource_group.this.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  provisioner "local-exec" {
+    when    = create
+    command = "echo Secret created"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "echo Deleting secret"
+  }
+
+}
+
+resource "azurerm_storage_container" "this" {
+  name                  = "content"
+  storage_account_name  = azurerm_storage_account.this.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_blob" "secret_files" {
+  name                   = "secret.txt"
+  storage_account_name   = azurerm_storage_account.this.name
+  storage_container_name = azurerm_storage_container.this.name
+  type                   = "Block"
+  source_content         = "Teszt"
 }
