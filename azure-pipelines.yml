@@ -29,8 +29,8 @@ jobs:
       artifactName: 'tf_files'
       artifactType: 'pipeline'
 
-  - job: SecondJob 
-    steps:
-    - script: echo Third step!
-      displayName: 'Run a one-line script'
+- job: SecondJob 
+  steps:
+  - script: echo Third step!
+    displayName: 'Run a one-line script'
 
