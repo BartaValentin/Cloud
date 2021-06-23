@@ -4,42 +4,40 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "=2.46.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.1.0"
+  }
+}
+
+
+provider "azurerm" {
+  features {
+    key_vault {
+      purge_soft_delete_on_destroy = true
     }
   }
 }
 
-module "test007example" {
-    source = "./modules/secret"
+module "childmodule" {
+  source = "./modules"
+  textlength = 10
 }
 
-provider "azurerm" {
-  features {}
-}
 
 data "azurerm_resource_group" "this" {
   name = "Akademia1"
 }
 
+data "azurerm_key_vault_secret" "this" {
+  name         = module.childmodule.secret_name
+  key_vault_id = module.childmodule.kv_id
+}
+
+
 resource "azurerm_storage_account" "this" {
-  name                     = "valentinbartastorage01"
+  name                     = "valentinstorage02"
   resource_group_name      = data.azurerm_resource_group.this.name
   location                 = data.azurerm_resource_group.this.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-
-  provisioner "local-exec" {
-    when    = create
-    command = "echo Secret created"
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "echo Deleting secret"
-  }
-
 }
 
 resource "azurerm_storage_container" "this" {
@@ -48,10 +46,14 @@ resource "azurerm_storage_container" "this" {
   container_access_type = "private"
 }
 
-resource "azurerm_storage_blob" "secret_files" {
-  name                   = "secret.txt"
+resource "azurerm_storage_blob" "this" {
+  provisioner "local-exec" {
+    command = "bash -c 'sleep 5'"
+    when = create
+  }
+  name                   = "top_secret.txt"
   storage_account_name   = azurerm_storage_account.this.name
   storage_container_name = azurerm_storage_container.this.name
   type                   = "Block"
-  source_content         = "Teszt"
+  source_content         = upper(data.azurerm_key_vault_secret.this.value)
 }
