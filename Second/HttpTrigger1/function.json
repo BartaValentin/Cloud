@@ -1,0 +1,27 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    },
+    {
+      "type": "table",
+      "direction": "out",
+      "name": "tableBindings",
+      "tableName": "Test",
+      "connection": "StorageTableConnection"
+    }
+  ],
+  "scriptFile": "../dist/HttpTrigger1/index.js"
+}
