@@ -1,36 +1,62 @@
+  
 trigger:
-- master
+  - master
 
 pool:
   vmImage: ubuntu-latest
 
 
-jobs:
+stages :
+  - stage: validate
+    jobs:
+      - job: validate
+        continueOnError: false
+        steps:
+          - task: TerraformInstaller@0
+            displayName: 'install'
+            inputs:
+              terraformVersion: '1.0.0'
+          - task: TerraformTaskV1@0
+            displayName: 'init'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'eteo-akademia-devops_test-dev'
+              backendAzureRmResourceGroupName: 'Akademia1'
+              backendAzureRmStorageAccountName: 'valentinstorage2'
+              backendAzureRmContainerName: 'content'
+              backendAzureRmKey: 'terraform.tfstate'
+          - task: TerraformTaskV1@0
+            displayName: 'validate'
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
 
-- job: FirstJob 
-  displayName: MyJob 
-  steps:
-  - script: echo Hello, world!
-    displayName: 'Run a one-line script'
-
-  - script: |
-      echo Add other tasks to build, test, and deploy your project.
-      echo See https://aka.ms/yaml
-    displayName: 'Run a multi-line script'
-
-  - task: CopyFiles@2
-    inputs:
-      contents: '**/*.tf'   
-      targetFolder: $(build.artifactstagingdirectory)
-
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: $(build.artifactstagingdirectory)
-      artifactName: 'tf_files'
-      artifactType: 'pipeline'
-
-- job: SecondJob 
-  steps:
-  - script: echo Third step!
-    displayName: 'Run a one-line script'
-
+  - stage: plan
+    dependsOn: [validate]
+    condition: succeeded('validate')
+    jobs:
+      - job: terraform_plan_develop
+        steps:
+          - checkout: self
+          - task: TerraformInstaller@0
+            displayName: 'install'
+            inputs:
+              terraformVersion: '1.0.0'
+          - task: TerraformTaskV1@0
+            displayName: 'init'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'eteo-akademia-devops_test-dev'
+              backendAzureRmResourceGroupName: 'Akademia1'
+              backendAzureRmStorageAccountName: 'jancsostorage02'
+              backendAzureRmContainerName: 'content'
+              backendAzureRmKey: 'terraform.tfstate'
+          - task: TerraformTaskV1@0
+            displayName: 'plan'
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              commandOptions: '-var="textlength=10"'
+              environmentServiceNameAzureRM: 'eteo-akademia-devops_test-dev'

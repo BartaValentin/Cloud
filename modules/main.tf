@@ -8,7 +8,11 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    key_vault {
+      purge_soft_delete_on_destroy = true
+    }
+  }
 }
 
 data "azurerm_resource_group" "this" {
@@ -18,14 +22,14 @@ data "azurerm_resource_group" "this" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "this" {
-  name                       = "valentinkeyvault"
+  name                       = "valentinkeyvault2"
   location                   = data.azurerm_resource_group.this.location
   resource_group_name        = data.azurerm_resource_group.this.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
-  soft_delete_enabled        = true
   purge_protection_enabled   = false
+  enabled_for_disk_encryption = true
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
@@ -60,7 +64,7 @@ resource "random_string" "myRandomString" {
 }
 
 resource "azurerm_key_vault_secret" "this" {
-  name         = "secret-by-valentin"
+  name         = "secret-by-bv"
   value        = random_string.myRandomString.result
   key_vault_id = azurerm_key_vault.this.id
 }

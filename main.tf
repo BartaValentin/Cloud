@@ -33,7 +33,7 @@ data "azurerm_key_vault_secret" "this" {
 
 
 resource "azurerm_storage_account" "this" {
-  name                     = "valentinstorage02"
+  name                     = "valentinstorage2"
   resource_group_name      = data.azurerm_resource_group.this.name
   location                 = data.azurerm_resource_group.this.location
   account_tier             = "Standard"
@@ -47,11 +47,13 @@ resource "azurerm_storage_container" "this" {
 }
 
 resource "azurerm_storage_blob" "this" {
+
   provisioner "local-exec" {
     command = "bash -c 'sleep 5'"
-    when = create
+    when    = create
   }
-  name                   = "top_secret.txt"
+
+  name                   = "secret.txt"
   storage_account_name   = azurerm_storage_account.this.name
   storage_container_name = azurerm_storage_container.this.name
   type                   = "Block"
