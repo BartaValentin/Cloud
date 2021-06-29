@@ -17,8 +17,6 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         name
     });
 
-    console.log('asd')
-
     context.res = {
         // status: 200, /* Defaults to 200 */
         body: responseMessage
