@@ -23,5 +23,5 @@
       "connection": "StorageTableConnection"
     }
   ],
-  "scriptFile": "../dist/HttpTrigger1/index.js"
+  "scriptFile": "index.js"
 }
