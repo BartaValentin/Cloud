@@ -14,13 +14,6 @@
       "type": "http",
       "direction": "out",
       "name": "res"
-    },
-    {
-      "type": "table",
-      "direction": "out",
-      "name": "tableBindings",
-      "tableName": "Test",
-      "connection": "StorageTableConnection"
     }
   ],
   "scriptFile": "../dist/HttpTrigger1/index.js"
