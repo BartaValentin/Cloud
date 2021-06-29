@@ -8,7 +8,7 @@
     "prestart": "npm run build",
     "start": "func start",
     "bundle": "npm run build && cd dist && bestzip ../bundle/academy-functions.zip *",
-    "deploy": "az functionapp deploy --resource-group Akademia2 --name ValentinFunctionApp --type zip --src-path bundle/academy-functions.zip",
+    "deploy": "az functionapp deploy --resource-group Akademia2 --name test-azure-functions-valentin --type zip --src-path bundle/academy-functions.zip",
     "test": "echo \"No tests yet...\""
   },
   "devDependencies": {
