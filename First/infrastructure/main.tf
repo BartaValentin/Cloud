@@ -15,6 +15,60 @@ data "azurerm_resource_group" "this" {
   name = "Akademia2"
 }
 
+resource "azurerm_api_management" "management" {
+  name                = "valentin-management-apim"
+  location            = data.azurerm_resource_group.this.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  publisher_name      = "Barta Valentin"
+  publisher_email     = "valentin.barta@eteo-sf.hu"
+
+  sku_name = "Developer_1"
+
+  policy {
+    xml_content = <<XML
+    <policies>
+      <inbound />
+      <backend />
+      <outbound />
+      <on-error />
+    </policies>
+XML
+
+  }
+}
+
+resource "azurerm_api_management_api" "management_api" {
+  name                = "example-api"
+  resource_group_name = data.azurerm_resource_group.this.name
+  api_management_name = azurerm_api_management.management.name
+  revision            = "1"
+  display_name        = "Example API"
+  path                = "example"
+  protocols           = ["https"]
+}
+
+resource "azurerm_api_management_api_policy" "policy" {
+  api_name            = azurerm_api_management_api.management_api.name
+  api_management_name = azurerm_api_management_api.management_api.api_management_name
+  resource_group_name = azurerm_api_management_api.management_api.resource_group_name
+
+  xml_content = <<XML
+<policies>
+  <inbound>
+    <find-and-replace from="xyz" to="abc" />
+  </inbound>
+</policies>
+XML
+}
+
+resource "azurerm_api_management_backend" "backend" {
+  name                = "valentin-backend"
+  resource_group_name = data.azurerm_resource_group.this.name
+  api_management_name = azurerm_api_management.management.name
+  protocol            = "http"
+  url                 = "https://test-azure-functions-valentin.azurewebsites.net"
+}
+
 resource "azurerm_storage_account" "this" {
   name                      = "valentinsa"
   resource_group_name       = data.azurerm_resource_group.this.name
@@ -53,13 +107,13 @@ resource "azurerm_function_app" "this" {
   https_only                 = true
 
   app_settings = {
-    FUNCTION_WORKER_RUNTIME = "node"
+    FUNCTION_WORKER_RUNTIME      = "node"
     WEBSITE_NODE_DEFAULT_VERSION = "12.18.0"
-    FUNCTION_APP_EDIT_MODE = "readonly"
-    https_only = true
-    WEBSITE_RUN_PACKAGE        = "https://valentinsa.blob.core.windows.net/valentincontainer/${azurerm_storage_blob.artifact.name}${data.azurerm_storage_account_sas.sas.sas}"
-    STORAGE_ACCOUNT_CONN_STRING = azurerm_storage_account.this.primary_connection_string
-    KISKUTYA = "vau"
+    FUNCTION_APP_EDIT_MODE       = "readonly"
+    https_only                   = true
+    WEBSITE_RUN_PACKAGE          = "https://valentinsa.blob.core.windows.net/valentincontainer/${azurerm_storage_blob.artifact.name}${data.azurerm_storage_account_sas.sas.sas}"
+    STORAGE_ACCOUNT_CONN_STRING  = azurerm_storage_account.this.primary_connection_string
+    KISKUTYA                     = "vau"
   }
 
 }
