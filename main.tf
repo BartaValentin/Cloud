@@ -18,7 +18,7 @@ provider "azurerm" {
 
 module "childmodule" {
   source = "./modules"
-  textlength = 10
+  textlength = var.textlength
 }
 
 
