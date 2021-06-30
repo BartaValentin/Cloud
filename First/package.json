@@ -14,9 +14,7 @@
   "devDependencies": {
     "@azure/functions": "^1.2.3",
     "@types/node": "^15.12.5",
-    "typescript": "^4.0.0"
-  },
-  "dependencies": {
+    "typescript": "^4.0.0",
     "bestzip": "^2.2.0",
     "rimraf": "^3.0.2"
   }
